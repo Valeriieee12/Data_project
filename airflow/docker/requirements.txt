@@ -1,0 +1,14 @@
+apache-airflow[postgres,celery]==2.7.1
+apache-airflow-providers-postgres==5.6.0
+apache-airflow-providers-common-sql==1.8.0
+psycopg2-binary==2.9.9
+pandas==2.0.3
+pyarrow==14.0.1
+fastparquet==2023.10.1
+psycopg2==2.9.9
+sqlalchemy==2.0.23
+pyspark==3.5.0
+python-dotenv==1.0.0
+numpy==1.24.3
+requests==2.31.0
+findspark==2.0.0

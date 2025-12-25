@@ -1,0 +1,126 @@
+ER-ДИАГРАММА: НОРМАЛИЗОВАННАЯ СХЕМА ДОСТАВОК
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           НОРМАЛИЗОВАННЫЕ ТАБЛИЦЫ (3НФ)                     │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+users (Пользователи)
+├── user_id (PK) BIGINT
+├── user_phone VARCHAR(50)
+└── created_at TIMESTAMP
+
+stores (Магазины)
+├── store_id (PK) BIGINT
+├── store_address TEXT
+└── created_at TIMESTAMP
+
+items (Товары)
+├── item_id (PK) BIGINT
+├── item_title TEXT
+├── item_category VARCHAR(255)
+└── created_at TIMESTAMP
+
+drivers (Курьеры)
+├── driver_id (PK) BIGINT
+├── driver_phone VARCHAR(50)
+└── created_at TIMESTAMP
+
+orders (Заказы)
+├── order_id (PK) BIGINT
+├── user_id (FK → users.user_id) BIGINT
+├── store_id (FK → stores.store_id) BIGINT
+├── address_text TEXT
+├── created_at TIMESTAMP
+├── paid_at TIMESTAMP
+├── delivery_started_at TIMESTAMP
+├── delivered_at TIMESTAMP
+├── canceled_at TIMESTAMP
+├── payment_type VARCHAR(50)
+├── order_discount DECIMAL(5,2)
+├── order_cancellation_reason TEXT
+├── delivery_cost DECIMAL(10,2)
+└── created_at_meta TIMESTAMP
+
+order_items (Позиции заказов)
+├── order_item_id (PK) BIGSERIAL
+├── order_id (FK → orders.order_id) BIGINT
+├── item_id (FK → items.item_id) BIGINT
+├── item_quantity INTEGER
+├── item_price DECIMAL(10,2)
+├── item_discount DECIMAL(5,2)
+├── item_canceled_quantity INTEGER
+├── item_replaced_id (FK → items.item_id) BIGINT
+└── created_at TIMESTAMP
+
+delivery_history (История доставки)
+├── delivery_id (PK) BIGSERIAL
+├── order_id (FK → orders.order_id) BIGINT
+├── driver_id (FK → drivers.driver_id) BIGINT
+├── assigned_at TIMESTAMP
+├── removed_at TIMESTAMP
+├── is_final_driver BOOLEAN
+└── created_at TIMESTAMP
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                               ВИТРИНЫ ДАННЫХ                                │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+orders_daily (Ежедневная агрегация по заказам)
+├── report_date (PK) DATE
+├── city (PK) VARCHAR(100)
+├── store_id (PK) BIGINT
+├── turnover DECIMAL(15,2)
+├── revenue DECIMAL(15,2)
+├── profit DECIMAL(15,2)
+├── orders_created BIGINT
+├── orders_delivered BIGINT
+├── orders_canceled BIGINT
+├── canceled_after_delivery BIGINT
+├── canceled_service_error BIGINT
+├── unique_customers BIGINT
+├── avg_order_value DECIMAL(10,2)
+├── orders_per_customer DECIMAL(10,2)
+├── revenue_per_customer DECIMAL(15,2)
+├── driver_changes_count BIGINT
+├── active_drivers_count BIGINT
+└── updated_at TIMESTAMP
+
+product_sales_daily (Ежедневная агрегация по товарам)
+├── report_date (PK) DATE
+├── city (PK) VARCHAR(100)
+├── store_id (PK) BIGINT
+├── item_category (PK) VARCHAR(255)
+├── item_id (PK) BIGINT
+├── turnover DECIMAL(15,2)
+├── ordered_units BIGINT
+├── canceled_units BIGINT
+├── orders_with_item BIGINT
+├── orders_with_canceled_item BIGINT
+├── popularity_rank_daily BIGINT
+├── popularity_rank_weekly BIGINT
+├── popularity_rank_monthly BIGINT
+└── updated_at TIMESTAMP
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           СВЯЗИ МЕЖДУ ТАБЛИЦАМИ                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+users (1) ─────── (n) orders
+stores (1) ────── (n) orders
+orders (1) ────── (n) order_items
+items (1) ─────── (n) order_items
+orders (1) ────── (n) delivery_history
+drivers (1) ───── (n) delivery_history
+items (1) ─────── (1) items (через item_replaced_id - самореференциальная связь)
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           КЛЮЧЕВЫЕ ИНДЕКСЫ                                 │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+1. idx_orders_user_id (orders.user_id)
+2. idx_orders_store_id (orders.store_id)
+3. idx_orders_created_at (orders.created_at)
+4. idx_order_items_order_id (order_items.order_id)
+5. idx_order_items_item_id (order_items.item_id)
+6. idx_delivery_history_order_id (delivery_history.order_id)
+7. idx_delivery_history_driver_id (delivery_history.driver_id)
